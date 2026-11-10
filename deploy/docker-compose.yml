@@ -1,0 +1,57 @@
+# Self-hosted deployment for a single small server (e.g. Oracle Cloud Always Free).
+# Usage: see deploy/README.md
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: ..
+    image: semesterly-selfhost
+    restart: always
+    env_file: .env
+    environment:
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+    command: >
+      sh -c "python3 manage.py migrate --noinput &&
+             rm -rf /static_out/* && cp -r /code/static/. /static_out/ &&
+             gunicorn semesterly.wsgi -b 0.0.0.0:8000 -w 3 --timeout 120"
+    volumes:
+      - ./local_settings.py:/code/semesterly/local_settings.py:ro
+      - static:/static_out
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file: .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - static:/srv/static:ro
+      - caddy_data:/data
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  static:
+  caddy_data:

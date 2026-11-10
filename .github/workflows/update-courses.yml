@@ -1,0 +1,47 @@
+name: Update courses (self-hosted)
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # daily, 3-4am Eastern
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Year
+        default: "2027"
+      term:
+        description: Term
+        default: Spring
+
+jobs:
+  update:
+    # Only runs where the DATABASE_URL secret is set (i.e. your fork)
+    if: github.repository_owner != 'jhuopensource'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JHU_API_KEY: ${{ secrets.JHU_API_KEY }}
+      SECRET_KEY: ci-only
+      YEAR: ${{ inputs.year || '2027' }}
+      TERM: ${{ inputs.term || 'Spring' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt whitenoise==6.9.0
+      - run: |
+          cp deploy/render/local_settings.py semesterly/local_settings.py
+          cp deploy/render/selfhost_middleware.py selfhost_middleware.py
+      - name: Migrate and show this semester in the picker
+        run: |
+          python manage.py migrate --noinput
+          python manage.py shell -c "
+          from parsing.models import DataUpdateSettings as D
+          s = D.load(); s.year = $YEAR; s.term = '$TERM'; s.active = True
+          s.max_allowed_year = $YEAR; s.max_allowed_term = '$TERM'; s.save()"
+      - name: Import courses
+        run: |
+          python manage.py ingest jhu --years "$YEAR" --terms "$TERM"
+          python manage.py digest jhu

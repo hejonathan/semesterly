@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: jhu-schedule
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    autoDeploy: false
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JHU_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
