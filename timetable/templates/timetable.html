@@ -106,6 +106,8 @@
   <!-- FINALLY COMPILED REACTJS -->
   {% render_bundle 'main' 'js' %}
 
+  {% if SELFHOST_NOTICE %}{% include "selfhost_notice.html" %}{% endif %}
+
 </body>
 
 </html>

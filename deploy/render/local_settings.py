@@ -48,6 +48,12 @@ MIDDLEWARE = ("whitenoise.middleware.WhiteNoiseMiddleware",) + tuple(
     for m in _base
 )
 
+# Show the "student self-hosted version" popup.
+import copy  # noqa: E402
+
+TEMPLATES = copy.deepcopy(sys.modules["semesterly.settings"].TEMPLATES)
+TEMPLATES[0]["OPTIONS"]["context_processors"].append("selfhost_middleware.selfhost_context")
+
 # settings.py initialises Rollbar with the official Semester.ly token whenever
 # DEBUG is False. Disable it so this instance doesn't report errors to them.
 import rollbar  # noqa: E402
