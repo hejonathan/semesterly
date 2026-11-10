@@ -46,6 +46,15 @@
 
 
   <!-- Google tag (gtag.js) -->
+  {% if SELFHOST_NOTICE %}{% if SELFHOST_GA_ID %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ SELFHOST_GA_ID }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ SELFHOST_GA_ID|escapejs }}');
+  </script>
+  {% endif %}{% else %}
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-R7YD3T336M"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -54,6 +63,7 @@
 
     gtag('config', 'G-R7YD3T336M');
   </script>
+  {% endif %}
 </head>
 
 <body>

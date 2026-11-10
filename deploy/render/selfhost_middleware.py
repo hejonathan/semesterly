@@ -10,4 +10,10 @@ class ForceJHUMiddleware(MiddlewareMixin):
 
 def selfhost_context(request):
     """Template context processor: show the self-hosted notice popup."""
-    return {"SELFHOST_NOTICE": True}
+    import os
+
+    return {
+        "SELFHOST_NOTICE": True,
+        # Your own Google Analytics ID (G-XXXX); unset = no analytics.
+        "SELFHOST_GA_ID": os.environ.get("GA_MEASUREMENT_ID", ""),
+    }

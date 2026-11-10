@@ -14,3 +14,5 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
+      - key: GA_MEASUREMENT_ID
+        sync: false

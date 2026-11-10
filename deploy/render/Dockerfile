@@ -26,4 +26,4 @@ COPY deploy/render/selfhost_middleware.py /code/selfhost_middleware.py
 RUN yarn build && python3 manage.py collectstatic --noinput
 
 ENV PYTHONUNBUFFERED=1
-CMD sh -c "python3 manage.py migrate --noinput && gunicorn semesterly.wsgi -b 0.0.0.0:${PORT:-10000} -w 2 --timeout 120"
+CMD sh -c "python3 manage.py migrate --noinput && gunicorn semesterly.wsgi -b 0.0.0.0:${PORT:-10000} -w 2 --timeout 120 --access-logfile -"
