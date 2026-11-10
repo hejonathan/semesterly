@@ -40,7 +40,9 @@ jobs:
           python manage.py shell -c "
           from parsing.models import DataUpdateSettings as D
           s = D.load(); s.year = $YEAR; s.term = '$TERM'; s.active = True
-          s.max_allowed_year = $YEAR; s.max_allowed_term = '$TERM'; s.save()"
+          s.max_allowed_year = $YEAR; s.max_allowed_term = '$TERM'; s.save()
+          # Create semester rows up front so concurrent web requests don't race to insert duplicates
+          from timetable.utils import get_current_semesters; get_current_semesters('jhu')"
       - name: Import courses
         run: |
           python manage.py ingest jhu --years "$YEAR" --terms "$TERM"

@@ -28,6 +28,11 @@ DATABASES = {
     }
 }
 
+# Don't email error reports to the Semester.ly team (the SMTP attempt also
+# hangs the worker until Render kills it).
+ADMINS = []
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 # Serve static files from the app itself with WhiteNoise.
 STATIC_ROOT = "/code/staticfiles"
 
